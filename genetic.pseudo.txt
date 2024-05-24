@@ -1,0 +1,84 @@
+# STRUCTURE
+create_permutations()
+create_population()
+get_weight():
+reproduce():
+get_best_member():
+mutate():
+is_valid_child():
+tournament_selection():
+genetic_search():
+
+# PSEUDOCODE
+FUNCTION create_permutations(graph, start_node, end_node):
+    nodes ← all nodes in graph EXCEPT start_node and end_node
+    permutations ← empty list
+    FOR each permutation in all possible permutations of nodes:
+        new_perm ← (start_node) + permutation + (end_node)
+        append new_perm to permutations
+    RETURN permutations
+
+FUNCTION create_population(graph, start_node, end_node):
+    permutations ← create_permutations(graph, start_node, end_node)
+    shuffle permutations randomly
+    population ← empty list
+    FOR each perm in permutations:
+        IF all edges in perm exist in graph:
+            append perm to population
+    WHILE length of population < 10:
+        randomly select an element from population and append it to population
+    RETURN first 10 elements of population
+
+FUNCTION get_weight(graph, route):
+    total_weight ← 0
+    TRY:
+        FOR i from 0 to length(route) - 2:
+            total_weight += weight of edge (route[i], route[i+1]) in graph
+        RETURN total_weight
+    EXCEPT:
+        RETURN infinity
+
+FUNCTION reproduce(parent1, parent2):
+    n ← length of parent1
+    c ← random integer between 0 and n
+    child ← first c elements of parent1 + last (n-c) elements of parent2
+    RETURN child
+
+FUNCTION get_best_member(graph, population):
+    RETURN member in population with minimum get_weight(graph, member)
+
+FUNCTION mutate(child):
+    convert child to list
+    c1, c2 ← two random indices in range 1 to length(child) - 1
+    swap elements at indices c1 and c2
+    convert child back to tuple
+    RETURN child
+
+FUNCTION is_valid_child(graph, child):
+    RETURN get_weight(graph, child) < infinity AND length of unique elements in child[1:-1] = length(child[1:-1])
+
+FUNCTION tournament_selection(graph, population, tournament_size):
+    tournament ← random sample of tournament_size elements from population
+    RETURN member in tournament with minimum get_weight(graph, member)
+
+FUNCTION genetic_search(graph, start_node, end_node, max_generations, tournament_size):
+    population ← create_population(graph, start_node, end_node)
+    
+    FOR generation from 1 to max_generations:
+        population_new ← empty list
+        
+        WHILE length of population_new < 10:
+            parent1 ← tournament_selection(graph, population, tournament_size)
+            parent2 ← tournament_selection(graph, population, tournament_size)
+            child ← reproduce(parent1, parent2)
+            
+            IF random number between 0 and 1 < 0.1:
+                child ← mutate(child)
+            
+            IF is_valid_child(graph, child):
+                append child to population_new
+        
+        population ← population_new
+    
+    best_member ← get_best_member(graph, population)
+    RETURN best_member
